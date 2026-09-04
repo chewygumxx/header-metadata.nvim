@@ -17,7 +17,7 @@
 local M = {}
 
 ---@type header-metadata.Config
-M.config = require("header-metadata.config").defaults
+M.config = vim.deepcopy(require("header-metadata.config").defaults)
 
 local trim_lines = function(lines)
     for i = 1, #lines, 1 do
@@ -35,8 +35,9 @@ M.insert = function(file, buf, opt)
     local git      = require("header-metadata.git")
 
     file = file or vim.fn.expand("%")
-    buf  = buf or 0
-    opt  = opt or {}
+    ---@cast file string
+    buf = buf or 0
+    opt = opt or {}
 
     local commentstring = opt.commentstring or vim.bo[buf].commentstring
     if commentstring == "" then
@@ -71,26 +72,25 @@ M.insert = function(file, buf, opt)
         slug = git.slug(file)
     end
     for _, rule in ipairs(M.config.path_rules or {}) do
-        if path:find(rule.match, 1, true) == 1 then
+        local boundary = path:sub(#rule.match + 1, #rule.match + 1)
+        if path:find(rule.match, 1, true) == 1 and (boundary == "/" or boundary == "") then
             slug = rule.slug
             path = path:gsub(rule.gsub[1], rule.gsub[2])
             break
         end
     end
 
-    if path then
-        lines[#lines + 1] = ""
-        lines[#lines + 1] = string.format(commentstring, "")
-        lines[#lines + 1] = string.format(commentstring, "")
-        if slug then
-            lines[#lines + 1] = string.format(commentstring, "~" .. slug .. ".git")
-            lines[#lines + 1] = string.format(commentstring, "::: " .. path)
-        else
-            lines[#lines + 1] = string.format(commentstring, path)
-        end
-        lines[#lines + 1] = string.format(commentstring, "")
-        lines[#lines + 1] = string.format(commentstring, "")
+    lines[#lines + 1] = ""
+    lines[#lines + 1] = string.format(commentstring, "")
+    lines[#lines + 1] = string.format(commentstring, "")
+    if slug then
+        lines[#lines + 1] = string.format(commentstring, "~" .. slug .. ".git")
+        lines[#lines + 1] = string.format(commentstring, "::: " .. path)
+    else
+        lines[#lines + 1] = string.format(commentstring, path)
     end
+    lines[#lines + 1] = string.format(commentstring, "")
+    lines[#lines + 1] = string.format(commentstring, "")
 
     -- Trailing Newline
     lines[#lines + 1] = ""
