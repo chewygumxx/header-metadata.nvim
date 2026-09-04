@@ -1,0 +1,34 @@
+# vim:set expandtab shiftwidth=4 filetype=yaml:
+# SPDX-License-Identifier: GPL-3.0-only
+
+#
+#
+# ~chewygumxx/header-metadata.nvim.git
+# ::: :/.github/workflows/test.yaml
+#
+#
+
+name: Test
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+    workflow_dispatch: {}
+
+jobs:
+    busted:
+        runs-on: ubuntu-latest
+
+        strategy:
+            fail-fast: false
+            matrix:
+                nvim_version: [stable, nightly]
+
+        steps:
+            - uses: actions/checkout@v7
+
+            - uses: nvim-neorocks/nvim-busted-action@v1
+              with:
+                  nvim_version: ${{ matrix.nvim_version }}

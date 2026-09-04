@@ -1,0 +1,19 @@
+-- vim:set expandtab shiftwidth=4 filetype=lua:
+-- SPDX-License-Identifier: GPL-3.0-only
+
+--
+--
+-- ~chewygumxx/header-metadata.nvim.git
+-- ::: :/.busted
+--
+--
+
+return {
+    _all = {
+        lua = "nlua",
+        lpath = "lua/?.lua;lua/?/init.lua",
+    },
+    default = {
+        verbose = true,
+    },
+}
