@@ -143,4 +143,13 @@ M.setup = function(opts)
     })
 end
 
+--
+-- Called by plugin/header-metadata.lua when vim.g.header_metadata is set,
+-- so users can configure via vim.g instead of an explicit setup() call.
+--
+M._auto_init = function()
+    local g = vim.g.header_metadata
+    M.setup(type(g) == "table" and g or nil)
+end
+
 return M

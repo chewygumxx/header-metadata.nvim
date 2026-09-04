@@ -34,7 +34,7 @@ jobs:
               run: luarocks install luacheck
 
             - name: Run luacheck
-              run: luacheck lua/
+              run: luacheck lua/ plugin/
 
     luafmt:
         runs-on: ubuntu-latest
@@ -52,4 +52,4 @@ jobs:
                   echo "$RUNNER_TEMP/luafmt" >> "$GITHUB_PATH"
 
             - name: Run luafmt --check
-              run: luafmt --check lua/
+              run: luafmt --check lua/ plugin/
