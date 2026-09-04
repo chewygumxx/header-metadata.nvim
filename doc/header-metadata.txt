@@ -1,0 +1,153 @@
+*header-metadata.txt*   Templated header/banner insertion for new buffers
+
+==============================================================================
+CONTENTS                                            *header-metadata-contents*
+
+  1. Introduction ..................... |header-metadata-introduction|
+  2. Setup ............................. |header-metadata-setup|
+  3. Configuration ..................... |header-metadata-configuration|
+  4. Commands .......................... |header-metadata-commands|
+  5. Lua API ............................ |header-metadata-api|
+  6. Health .............................. |header-metadata-health|
+
+==============================================================================
+1. Introduction                    *header-metadata* *header-metadata-introduction*
+
+header-metadata.nvim prepends new buffers with a templated header: a vim
+modeline line, an optional license line, and a git slug/path block, each
+rendered through the buffer's own 'commentstring'. It also resolves a
+shebang line for shell/interpreter filetypes, using `#!/bin/false` for
+files that live under a configured source directory (not meant to be
+executed directly).
+
+==============================================================================
+2. Setup                                              *header-metadata-setup*
+
+There are two ways to configure the plugin; both call the same code path,
+so pick whichever fits your config manager.
+
+Explicit `setup()` call ~
+>lua
+    require("header-metadata").setup({
+        command_name = "InsertHeader",
+        autocmd      = true,
+        license      = "SPDX-License-Identifier: GPL-3.0-only",
+        source_dirs  = { "~/dev/header-metadata.nvim" },
+        path_rules   = {
+            {
+                match = "~/.config",
+                slug  = "chewygumxx/dotfiles",
+                gsub  = { "^~/%.config", "~/.config" },
+            },
+        },
+    })
+<
+`vim.g.header_metadata` ~
+                                                     *g:header_metadata*
+Set before the plugin loads (e.g. in `init.lua`, before any `lazy.nvim`
+`config` callback would normally run) to auto-configure without an
+explicit `setup()` call:
+>lua
+    vim.g.header_metadata = {
+        autocmd = true,
+    }
+<
+`plugin/header-metadata.lua` reads this at startup and calls `setup()` on
+your behalf. Leaving `vim.g.header_metadata` unset (the default) is a
+no-op: the plugin does nothing until you either set this variable or call
+`setup()` explicitly, so existing explicit-`setup()` configs are
+unaffected either way. Setting `vim.g.header_metadata = {}` (an empty
+table) auto-inits with all-default config.
+
+==============================================================================
+3. Configuration                                *header-metadata-configuration*
+
+                                                    *header-metadata.Config*
+All fields are optional; unset fields fall back to the defaults below. See
+`lua/header-metadata/config.lua` for the authoritative schema (this section
+mirrors it; that file is the source of truth if the two ever disagree).
+
+`command_name` (string, default: `"InsertHeader"`) ~
+    Name of the user command registered by `setup()`.
+
+`autocmd` (boolean, default: `false`) ~
+    When `true`, registers a `BufNewFile`/`FileType` autocmd pair that
+    inserts the header automatically into new file buffers. When `false`,
+    insertion only happens via the command (see |header-metadata-commands|).
+
+`license` (string|nil, default: `nil`) ~
+    Text for an optional license line, rendered through 'commentstring'.
+    `nil` omits the line entirely.
+
+`shebangs` (table<string,string>, default: a small built-in map) ~
+    Maps a buffer's filetype to the shebang line to insert (e.g.
+    `{ sh = "#!/bin/sh", lua = "#!/usr/bin/env lua" }`). A filetype with no
+    entry gets no shebang line.
+
+`source_dirs` (string[], default: `{}`) ~
+    Tilde-relative directory paths (as returned by
+    `vim.fn.fnamemodify(file, ":~:h")`, e.g. `"~/.config/nvim/lua"`). A
+    file at or under any of these gets `#!/bin/false` instead of its
+    filetype's normal shebang, since it's source to be `require()`d, not
+    executed directly. Matching is by full path segment: a configured dir
+    matches itself and anything under it, but never an unrelated path that
+    merely starts with the same characters (e.g. `"~/.config"` does not
+    match `"~/.config-backup"`).
+
+`path_rules` (header-metadata.PathRule[], default: `{}`) ~
+    Repo-relative path/slug rewrite rules, checked in order; the first
+    matching rule wins. Each rule is:
+      `match` (string): tilde-relative path prefix to match (same
+      full-path-segment matching as `source_dirs` above).
+      `slug` (string): `"owner/repo"`-form slug to render for matching
+      paths.
+      `gsub` (string[]): a `{ from, to }` pair passed to `string.gsub` on
+      the path before rendering it.
+
+==============================================================================
+4. Commands                                        *header-metadata-commands*
+
+                                                              *:InsertHeader*
+:InsertHeader                  Insert the templated header into the current
+                                buffer. Registered under the name given by
+                                the `command_name` config field (default
+                                `InsertHeader`); examples in this doc use
+                                that default name.
+
+==============================================================================
+5. Lua API                                              *header-metadata-api*
+
+                                                        *header-metadata.setup()*
+setup({opts})                                              *header-metadata.setup*
+    Merges {opts} (a |header-metadata.Config|, all fields optional) over
+    the plugin defaults, validates the result, and registers the command
+    and (if `autocmd` is enabled) the autocmds described above. Called
+    automatically by `plugin/header-metadata.lua` when
+    |g:header_metadata| is set; otherwise call it yourself.
+
+                                                        *header-metadata.insert()*
+insert({file}, {buf}, {opt})                               *header-metadata.insert*
+    Inserts the templated header into {buf} (default: current buffer),
+    templated for {file} (default: the current buffer's file path) and,
+    optionally, an explicit {opt.commentstring} overriding the buffer's
+    own 'commentstring'. This is what both `:InsertHeader` and the
+    `autocmd` path call under the hood; call it directly if you need to
+    insert a header into a buffer that isn't the current one.
+
+                                                       *header-metadata.command()*
+command()                                                  *header-metadata.command*
+    Thin wrapper around `insert()` for the current buffer; this is the
+    callback registered for `:InsertHeader`.
+
+==============================================================================
+6. Health                                              *header-metadata-health*
+
+>vim
+    :checkhealth header-metadata
+<
+Checks that `git` is on `$PATH` (slug/path resolution in
+`lua/header-metadata/git.lua` no-ops without it) and re-validates the
+currently active config.
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:
