@@ -1,0 +1,33 @@
+# vim:set expandtab shiftwidth=4 filetype=yaml:
+# SPDX-License-Identifier: GPL-3.0-only
+
+#
+#
+# ~chewygumxx/header-metadata.nvim.git
+# ::: :/.github/workflows/typecheck.yaml
+#
+#
+
+name: Type Check
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+    workflow_dispatch: {}
+
+jobs:
+    typecheck:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v7
+
+            - name: Type check
+              uses: stevearc/nvim-typecheck-action@v2
+              with:
+                  path:          .
+                  configpath:    .luarc.json
+                  level:         Warning
+                  nvim-version:  stable

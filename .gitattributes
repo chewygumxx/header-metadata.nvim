@@ -1,0 +1,15 @@
+# vim:set expandtab shiftwidth=4 filetype=gitattributes:
+# SPDX-License-Identifier: GPL-3.0-only
+
+#
+#
+# ~chewygumxx/header-metadata.nvim.git
+# ::: :/.gitattributes
+#
+#
+
+* text=auto eol=lf
+
+/LICENSE        -sync-header-metadata
+/.meteor.json   -sync-header-metadata
+/.luarc.json    -sync-header-metadata

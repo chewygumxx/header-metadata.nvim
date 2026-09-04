@@ -1,0 +1,43 @@
+# vim:set expandtab shiftwidth=4 filetype=yaml:
+# SPDX-License-Identifier: GPL-3.0-only
+
+#
+#
+# ~chewygumxx/header-metadata.nvim.git
+# ::: :/.github/workflows/apply-repo-metadata-jsonc.yaml
+#
+#
+
+#
+# Applies metadata to a repository according to :/.repo-metadata.jsonc
+#
+
+name: Apply repository metadata (JSONC)
+on:
+    push:
+        paths:
+            - .repo-metadata.jsonc
+    workflow_dispatch: {}
+
+permissions:
+    contents: read
+
+jobs:
+    apply:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Mint App Installation Token
+              id:   app-token
+              uses: actions/create-github-app-token@v3
+              with:
+                  client-id:   ${{    vars.METADATA_APP_CLIENT_ID   }}
+                  private-key: ${{ secrets.METADATA_APP_PRIVATE_KEY }}
+                  permission-administration: write
+
+            - uses: actions/checkout@v5
+
+            - name: Apply Metadata
+              uses: chewygumxx/apply-repo-metadata-jsonc@v2
+              with:
+                  metadata_path: .repo-metadata.jsonc
+                  token: ${{ steps.app-token.outputs.token }}

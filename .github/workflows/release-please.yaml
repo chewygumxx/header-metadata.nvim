@@ -1,0 +1,30 @@
+# vim:set expandtab shiftwidth=4 filetype=yaml:
+# SPDX-License-Identifier: GPL-3.0-only
+
+#
+#
+# ~chewygumxx/header-metadata.nvim.git
+# ::: :/.github/workflows/release-please.yaml
+#
+#
+
+name: Release Please
+
+on:
+    push:
+        branches:
+            - main
+
+permissions:
+    contents: write
+    issues: write
+    pull-requests: write
+
+jobs:
+    release-please:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: googleapis/release-please-action@v5
+              with:
+                  release-type: simple

@@ -1,0 +1,55 @@
+# vim:set expandtab shiftwidth=4 filetype=yaml:
+# SPDX-License-Identifier: GPL-3.0-only
+
+#
+#
+# ~chewygumxx/header-metadata.nvim.git
+# ::: :/.github/workflows/lint.yaml
+#
+#
+
+name: Lint
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+    workflow_dispatch: {}
+
+jobs:
+    luacheck:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v7
+
+            - uses: leafo/gh-actions-lua@v13
+              with:
+                  luaVersion: "5.1.5"
+
+            - uses: leafo/gh-actions-luarocks@v6
+
+            - name: Install luacheck
+              run: luarocks install luacheck
+
+            - name: Run luacheck
+              run: luacheck lua/
+
+    luafmt:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v7
+
+            - name: Install luafmt
+              run: |
+                  mkdir -p "$RUNNER_TEMP/luafmt"
+                  curl -sL "https://github.com/EmmyLuaLs/emmylua-analyzer-rust/releases/latest/download/luafmt-linux-x64-glibc.2.17.tar.gz" \
+                      -o "$RUNNER_TEMP/luafmt/luafmt.tar.gz"
+                  tar -xzf "$RUNNER_TEMP/luafmt/luafmt.tar.gz" -C "$RUNNER_TEMP/luafmt"
+                  chmod +x "$RUNNER_TEMP/luafmt/luafmt"
+                  echo "$RUNNER_TEMP/luafmt" >> "$GITHUB_PATH"
+
+            - name: Run luafmt --check
+              run: luafmt --check lua/
