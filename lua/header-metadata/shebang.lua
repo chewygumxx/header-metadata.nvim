@@ -19,7 +19,7 @@ local M = {}
 ---@param file string
 ---@param buf  number
 ---@param opt  { ft: string?, source_dirs: string[]?, shebangs: table<string, string>? }
----@return string
+---@return string?
 M.get = function(file, buf, opt)
     file = file or vim.fn.expand("%")
     buf  = buf or 0
@@ -32,7 +32,7 @@ M.get = function(file, buf, opt)
     -- If within source directory, not intended for execution
     local path = vim.fn.fnamemodify(file, ":~:h")
     for _, dir in ipairs(source_dirs) do
-        if path:find(dir .. "/", 1, true) == 1 then
+        if path == dir or path:find(dir .. "/", 1, true) == 1 then
             return "#!/bin/false"
         end
     end
