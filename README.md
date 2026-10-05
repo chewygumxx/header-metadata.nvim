@@ -1,18 +1,26 @@
-<!-- vim:set expandtab shiftwidth=2 filetype=markdown: -->
-<!-- SPDX-License-Identifier: GPL-3.0-only -->
+---
+ctime: 2026-09-04
+mtime: 2026-10-05
+spdx: GPL-3.0-only
+title: header-metadata.nvim
+description: >-
+  [Neovim Plugin] Handles bespoke-formatted header metadata
+tags:
+  - nvim
+  - nvim-plugin
+  - headers
+---
 
 <!--
    -
-   - ~chewygumxx/header-metadata.nvim
+   - ~chewygumxx/header-metadata.nvim.git
    - ::: :/README.md
    -
-   -->
-
-<!--
-   - [Neovim Plugin] Handles bespoke-formatted header metadata
    -->
 
 # header-metadata.nvim
 
 Templated header metadata insertion for new buffers: a modeline, an optional
 license line, and a git slug/path block.
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown: -->
